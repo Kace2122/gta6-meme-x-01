@@ -13,7 +13,7 @@
 // stand in for /bot and /output:
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const BOT_DIR = process.env.MAKEFUN_BOT_DIR ?? '/bot';
@@ -25,7 +25,8 @@ const dst = join(OUTPUT_DIR, 'POST.json');
 mkdirSync(OUTPUT_DIR, { recursive: true });
 const bytes = readFileSync(src);
 writeFileSync(dst, bytes);
-if (statSync(dst).size !== bytes.length) {
-  console.error(`POST.json copy size mismatch: wrote ${statSync(dst).size}, expected ${bytes.length}`);
+const written = readFileSync(dst);
+if (!written.equals(bytes)) {
+  console.error(`POST.json copy mismatch: wrote ${written.length} bytes, expected ${bytes.length} identical bytes`);
   process.exit(1);
 }
